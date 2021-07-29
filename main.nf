@@ -12,8 +12,10 @@ def helpMessage() {
       --query               Query file in fasta format
       --db                  Blast database
       --blast_type          Which blast would you like to run? (default: blastn)
-    Options:
-      --output_folder       Folder to place analysis outputs (default ./midas)
+      --prefix              Output prefix (default: 'output')
+      --project             Folder to place analysis outputs (default: 'project')
+    
+    Options
       --chunksize           Number of sequences to be processed per node (default: 100)
     """.stripIndent()
 }
@@ -58,6 +60,9 @@ if (params.db == "nt"){
   db_path = "/mnt/efs/databases/Blast/Silva/v138.1/blastdb_custom/silva138"
 } else if (params.db == "silva_nr"){
   db_path = "/mnt/efs/databases/Blast/Silva/v138.1/blastdb_custom/silva138_nr"
+} else {
+  exit 1, "Database $params.db not found. Please select one of these:"
+  
 }
 
 println db_path
@@ -69,11 +74,11 @@ println db_path
 
 
 params.blast_type = "blastn"
-params.output_folder = "test"
-params.prefix = "TY0000004.cons"
-params.chunksize = 50
+params.project = "project"
+params.prefix = "output"
+params.chunksize = 100
 
-out = "s3://genomics-workflow-core/Pipeline_Results/Blast/${params.output_folder}/${params.prefix}.${params.blast_type}.tsv"
+out = "s3://genomics-workflow-core/Pipeline_Results/Blast/${params.project}/${params.prefix}.${params.blast_type}.tsv"
 /* 
  * Given the query parameter creates a channel emitting the query fasta file(s), 
  * the file is split in chunks containing as many sequences as defined by the parameter 'chunksize'.
