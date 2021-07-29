@@ -1,4 +1,4 @@
-Hello world script
+NF-BLAST
 ====================
 
-A simple script showing the basic Hello World! example for the Nextflow framework. 
+A Nextflow script that will run BLAST and using fasta files on S3 and databases available on a shared filesystem (EFS).
