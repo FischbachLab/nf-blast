@@ -1,0 +1,5 @@
+{
+    "nt":"/mnt/efs/databases/Blast/nt/db/nt",
+    "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/blastdb_custom/silva138_nr",
+    "silva":"/mnt/efs/databases/Blast/Silva/v138.1/blastdb_custom/silva138"
+}

@@ -1,2 +1,4 @@
-# nf-blast
-Blast tools using Nextflow on AWS Batch using database on a shared file system.
+Hello world script
+====================
+
+A simple script showing the basic Hello World! example for the Nextflow framework. 
