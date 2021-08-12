@@ -29,12 +29,12 @@ if (params.help){
 }
 
 // // Show help message if the user specifies a fasta file but not makedb or db
-// if (params.fasta && ((params.db == null) || (params.makedb == null))){
-//     // Invoke the function above which prints the help message
-//     helpMessage()
-//     // Exit out and do not run anything else
-//     exit 0
-// }
+if ((params.fasta  == null) || (params.db == null) || (params.blast_type == null)){
+    // Invoke the function above which prints the help message
+    helpMessage()
+    // Exit out and do not run anything else
+    exit 0
+}
 
 // // Make sure that the Midas database file can be found
 // if (file(params.db).isEmpty()){
@@ -60,19 +60,19 @@ def db_map = [
   "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/blastdb_custom/silva138_nr"
   ]
 
-if (db_map.containsKey(${params.db})){
-  db_path = db_map.get(${params.db})
+def db_path = null
+
+if (db_map[params.db]){
+  db_path = db_map[params.db])
 } else {
   log.info"""
     Cannot find the database specified by --db ${params.db}. Must use one of:
     """.stripIndent()
-    map.each { key, value ->
+    db_map.each { key, value ->
     log.info "$key"
 }
   exit 0
 }
-
-println db_path
 
 /*
  * Defines the pipeline inputs parameters (giving a default value for each for them) 
