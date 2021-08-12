@@ -54,15 +54,22 @@ Channel
 
 // Write a function to read the db parameter and get the full path from databases json file
 // and error if database does not exist
-if (params.db == "nt"){
-  db_path = "/mnt/efs/databases/Blast/nt/db/nt"
-} else if (params.db == "silva"){
-  db_path = "/mnt/efs/databases/Blast/Silva/v138.1/blastdb_custom/silva138"
-} else if (params.db == "silva_nr"){
-  db_path = "/mnt/efs/databases/Blast/Silva/v138.1/blastdb_custom/silva138_nr"
+def db_map = [
+  "nt":"/mnt/efs/databases/Blast/nt/db/nt",
+  "silva":"/mnt/efs/databases/Blast/Silva/v138.1/blastdb_custom/silva138",
+  "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/blastdb_custom/silva138_nr"
+  ]
+
+if (db_map.containsKey(${params.db})){
+  db_path = db_map.get(${params.db})
 } else {
-  exit 1, "Database $params.db not found. Please select one of these:"
-  
+  log.info"""
+    Cannot find the database specified by --db ${params.db}. Must use one of:
+    """.stripIndent()
+    map.each { key, value ->
+    log.info "$key"
+}
+  exit 0
 }
 
 println db_path
