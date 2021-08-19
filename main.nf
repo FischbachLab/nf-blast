@@ -55,15 +55,18 @@ Channel
 // Write a function to read the db parameter and get the full path from databases json file
 // and error if database does not exist
 def db_map = [
-  "nt":"/mnt/efs/databases/Blast/nt/db/nt",
-  "silva":"/mnt/efs/databases/Blast/Silva/v138.1/blastdb_custom/silva138",
-  "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/blastdb_custom/silva138_nr"
-  ]
+  "nt":"/mnt/efs/databases/Blast/nt/nt",
+  "ncbi_16s":"/mnt/efs/databases/Blast/16S_ribosomal_RNA/16S_ribosomal_RNA",
+  "silva":"/mnt/efs/databases/Blast/Silva/v138.1/silva138",
+  "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/silva138_nr"
+]
+
 
 def db_path = null
 
 if (db_map[params.db]){
   db_path = db_map[params.db])
+  log.info"""Using database at location ${db_path}""".stripIndent()
 } else {
   log.info"""
     Cannot find the database specified by --db ${params.db}. Must use one of:
@@ -111,9 +114,6 @@ process blast {
 
     output:
     file 'blast_result' into hits_ch
-
-    // echo "Listing path to database ($db_dir):"
-    // ls $db_dir
 
     script:
     """
