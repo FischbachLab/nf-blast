@@ -11,9 +11,9 @@ def helpMessage() {
     Required Arguments:
       --query               Query file in fasta format
       --db                  Blast database
-      --blast_type          Which blast would you like to run? (default: blastn)
-      --prefix              Output prefix (default: 'output')
-      --project             Folder to place analysis outputs (default: 'project')
+      --blast_type          Which blast would you like to run? (default: ${params.blast_type})
+      --prefix              Output prefix (default: ${params.prefix})
+      --project             Folder to place analysis outputs (default: ${params.project})
     
     Options
       --chunksize           Number of sequences to be processed per node (default: 100)
@@ -29,11 +29,11 @@ if (params.help){
 }
 
 // // Show help message if the user specifies a fasta file but not makedb or db
-if ((params.fasta  == null) || (params.db == null) || (params.blast_type == null)){
+if ((params.query  == null) || (params.db == null) || (params.blast_type == null)){
     // Invoke the function above which prints the help message
     helpMessage()
     // Exit out and do not run anything else
-    exit 0
+    exit 1
 }
 
 // // Make sure that the Midas database file can be found
@@ -65,7 +65,7 @@ def db_map = [
 def db_path = null
 
 if (db_map[params.db]){
-  db_path = db_map[params.db])
+  db_path = db_map[params.db]
   log.info"""Using database at location ${db_path}""".stripIndent()
 } else {
   log.info"""
@@ -77,18 +77,9 @@ if (db_map[params.db]){
   exit 0
 }
 
-/*
- * Defines the pipeline inputs parameters (giving a default value for each for them) 
- * Each of the following parameters can be specified as command line options
- */
 
-
-params.blast_type = "blastn"
-params.project = "project"
-params.prefix = "output"
-params.chunksize = 100
-
-out = "s3://genomics-workflow-core/Pipeline_Results/Blast/${params.project}/${params.prefix}.${params.blast_type}.tsv"
+def output_base = "${params.outdir}/${params.project}"
+def out = "${output_base}/${params.prefix}.${params.blast_type}.tsv"
 /* 
  * Given the query parameter creates a channel emitting the query fasta file(s), 
  * the file is split in chunks containing as many sequences as defined by the parameter 'chunksize'.
@@ -98,7 +89,6 @@ Channel
     .fromPath(params.query)
     .splitFasta(by: params.chunksize, file:true)
     .set { fasta_ch }
-
 
 /* 
  * Executes a BLAST job for each chunk emitted by the 'fasta_ch' channel 
