@@ -16,7 +16,7 @@ def helpMessage() {
       --project             Folder to place analysis outputs (default: ${params.project})
     
     Options
-      --chunksize           Number of sequences to be processed per node (default: 100)
+      --chunksize           Number of sequences to be processed per node (default: ${params.chunksize})
     """.stripIndent()
 }
 
@@ -56,6 +56,7 @@ Channel
 // and error if database does not exist
 def db_map = [
   "nt":"/mnt/efs/databases/Blast/nt/nt",
+  "nr":"/mnt/efs/databases/Blast/nr/nr",
   "ncbi_16s":"/mnt/efs/databases/Blast/16S_ribosomal_RNA/16S_ribosomal_RNA",
   "silva":"/mnt/efs/databases/Blast/Silva/v138.1/silva138",
   "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/silva138_nr"
@@ -111,9 +112,9 @@ process blast {
       -num_threads  $task.cpus \
       -query query.fa \
       -db $db_path \
-      -dbsize 1000000 \
-      -num_alignments 500 \
-      -outfmt '6 std qlen slen qcovs' > blast_result
+      -dbsize ${params.dbsize} \
+      -num_alignments ${params.max_aln} \
+      -outfmt ${params.outfmt} > blast_result
     """
 }
 
