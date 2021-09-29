@@ -28,3 +28,9 @@ aws batch submit-job \
 - a maximum of `500` alignments are allowed per query.
 - the query file is split into smaller chunnks of `1000` sequences each, before running a blast on each chunk in parallel and finally merging into a single output table.
 
+## Update the pipeline
+
+```{bash}
+cd nf-blast
+aws s3 sync . s3://nextflow-pipelines/nf-blast --exclude ".git/*" --profile maf
+```
