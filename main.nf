@@ -55,8 +55,8 @@ Channel
 // Write a function to read the db parameter and get the full path from databases json file
 // and error if database does not exist
 def db_map = [
-  "nt":"/mnt/efs/databases/Blast/nt/nt",
-  "nr":"/mnt/efs/databases/Blast/nr/nr",
+  "nt":"/mnt/efs/databases/Blast/nt/db/nt",
+  "nr":"/mnt/efs/databases/Blast/nr/db/nr",
   "ncbi_16s":"/mnt/efs/databases/Blast/16S_ribosomal_RNA/16S_ribosomal_RNA",
   "silva":"/mnt/efs/databases/Blast/Silva/v138.1/silva138",
   "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/silva138_nr"
