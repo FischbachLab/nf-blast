@@ -10,7 +10,23 @@ aws batch submit-job \
     --job-definition nextflow-production \
     --container-overrides command=s3://nextflow-pipelines/nf-blast,\
 "--query","s3://nextflow-pipelines/blast/data/TY0000004.cons.fa",\
-"--db","ncbi_16s"
+"--db","nt"
+```
+
+## Sample Parameters for Nextflow Tower
+
+```{json}
+{
+    "blast_type": "blastn",
+    "db": "nt",
+    "chunksize": 1000,
+    "dbsize": 1000000,
+    "outfmt": "'7 std qlen slen qcovs sscinames'",
+    "max_aln": 500,
+    "project": "00_Test",
+    "prefix": "output-0929",
+    "query": "s3://nextflow-pipelines/blast/data/TY0000004.cons.fa"
+}
 ```
 
 ## Available datbases
