@@ -1,0 +1,8 @@
+{
+    "blast_type": "blastn",
+    "db": "nt",
+    "outfmt": "'7 std qlen slen qcovs sscinames'",
+    "project": "00_Test",
+    "prefix": "output-0929",
+    "query": "s3://nextflow-pipelines/blast/data/TY0000004.cons.fa"
+}
