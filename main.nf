@@ -36,18 +36,6 @@ if ((params.query  == null) || (params.db == null) || (params.blast_type == null
     exit 1
 }
 
-// // Make sure that the Midas database file can be found
-// if (file(params.db).isEmpty()){
-
-//     // Print a helpful log message
-//     log.info"""
-//     Cannot find the file specified by --db_midas ${params.db_midas}
-//     """.stripIndent()
-
-//     // Exit out and do not run anything else
-//     exit 0
-// }
-
 Channel
   .fromPath(params.query)
   .ifEmpty { exit 1, "Cannot find matching fasta file" }
