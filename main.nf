@@ -66,9 +66,17 @@ if (db_map[params.db]){
   exit 0
 }
 
+//Creates working dir
+workingpath = params.outdir + "/" + params.project + "/" + params.prefix
+workingdir = file(workingpath)
 
-def output_base = "${params.outdir}/${params.project}"
-def out = "${output_base}/${params.prefix}.${params.blast_type}.tsv"
+if( !workingdir.exists() ) {
+    if( !workingdir.mkdirs() )     {
+        exit 1, "Cannot create working directory: $workingpath"
+    } 
+}    
+def out = "${workingpath}/${params.prefix}.${params.blast_type}.tsv"
+
 /* 
  * Given the query parameter creates a channel emitting the query fasta file(s), 
  * the file is split in chunks containing as many sequences as defined by the parameter 'chunksize'.
