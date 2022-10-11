@@ -45,7 +45,7 @@ Channel
 def db_map = [
   "nt":"/mnt/efs/databases/Blast/nt/db/nt",
   "nr":"/mnt/efs/databases/Blast/nr/db/nr",
-  "ncbi_16s":"/mnt/efs/databases/Blast/16S_ribosomal_RNA/16S_ribosomal_RNA",
+  "ncbi_16s":"/mnt/efs/databases/Blast/16S_ribosomal_RNA/db/16S_ribosomal_RNA",
   "silva":"/mnt/efs/databases/Blast/Silva/v138.1/silva138",
   "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/silva138_nr"
 ]
