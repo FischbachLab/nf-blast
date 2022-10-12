@@ -34,8 +34,8 @@ aws batch submit-job \
 ## Available databases
 
 - `nt`- [Last Updated: 2022-10-11] version: 2022-10-01-01-05-02
-- `nr` - [Last Updated: 2022-03-28]
-- `ncbi_16s` - [Last Updated: 2021-07-22]
+- `nr` - [Last Updated: 2022-10-11] version: 2022-10-01-01-05-02
+- `ncbi_16s` - [Last Updated: 2022-10-11] version: 2022-10-01-01-05-02
 - `silva` SSU v138.1  - [Last Updated: 2021-07-22]
 - `silva_nr` SSU v138.1  - [Last Updated: 2021-07-22]
 
