@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-
+dsl.version = '1.0'
 // If the user uses the --help flag, print the help text below
 params.help = false
 
@@ -47,7 +47,8 @@ def db_map = [
   "nr":"/mnt/efs/databases/Blast/nr/db/nr",
   "ncbi_16s":"/mnt/efs/databases/Blast/16S_ribosomal_RNA/db/16S_ribosomal_RNA",
   "silva":"/mnt/efs/databases/Blast/Silva/v138.1/silva138",
-  "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/silva138_nr"
+  "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/silva138_nr",
+  "immeDB":"/mnt/efs/databases/Blast/immeDB/db/immeDB",
 ]
 
 
