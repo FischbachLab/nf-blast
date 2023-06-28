@@ -105,12 +105,10 @@ process blast {
 
     script:
     """
-    export BLASTDB=$db_path
-
     ${params.blast_type} \
       -num_threads  $task.cpus \
       -query query.fa \
-      -db $db \
+      -db $db_path \
       -dbsize ${params.dbsize} \
       -num_alignments ${params.max_aln} \
       -perc_identity ${params.min_perc_id} \
