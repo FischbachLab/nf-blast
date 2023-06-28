@@ -111,7 +111,6 @@ process blast {
       -db $db_path \
       -dbsize ${params.dbsize} \
       -num_alignments ${params.max_aln} \
-      -perc_identity ${params.min_perc_id} \
       -outfmt ${params.outfmt} > blast_result
     """
 }
