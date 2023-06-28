@@ -68,7 +68,7 @@ if (db_map[params.db]){
 }
 
 //Creates working dir
-workingpath = params.outdir + "/" + params.project + "/" + params.prefix
+workingpath = params.outdir + "/" + params.project + "/" + params.prefix + "/" + params.db
 workingdir = file(workingpath)
 
 if( !workingdir.exists() ) {
