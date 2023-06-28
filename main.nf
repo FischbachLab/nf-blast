@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-dsl.version = '1.0'
+nextflow.enable.dsl=1
 // If the user uses the --help flag, print the help text below
 params.help = false
 
