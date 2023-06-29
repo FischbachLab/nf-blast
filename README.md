@@ -70,5 +70,6 @@ aws s3 ls s3://maf-users/Daisy_Lee/abricate/20230614/ \
 | parallel -j 4 "bash run_multi_file_blast.sh {}" &> run_multi_file_blast.log &
 ```
 
-NOTE 1: The above command will run 4 jobs in parallel. You can change the number of jobs to run in parallel by changing the `-j` parameter.
-NOTE 2: The above command has only been tested on a Mac or Unix system. It may not work on Windows.
+>**NOTE 1**: The above command will run 4 jobs in parallel. You can change the number of jobs to run in parallel by changing the `-j` parameter.
+>
+>**NOTE 2**: The above command has only been tested on a Mac or Unix system. It may not work on Windows.
