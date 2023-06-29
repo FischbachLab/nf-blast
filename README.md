@@ -38,6 +38,7 @@ aws batch submit-job \
 - `ncbi_16s` - [Last Updated: 2022-10-11] version: 2022-10-01-01-05-02
 - `silva` SSU v138.1  - [Last Updated: 2021-07-22]
 - `silva_nr` SSU v138.1  - [Last Updated: 2021-07-22]
+- `immeDB` - [Last Updated: 2023-06-27]
 
 ## By default
 
@@ -45,3 +46,29 @@ aws batch submit-job \
 - e-values are calculated based on a `dbsize` of 1e6, to allow comparison between results from different databases.
 - a maximum of `500` alignments are allowed per query.
 - the query file is split into smaller chunnks of `1000` sequences each, before running a blast on each chunk in parallel and finally merging into a single output table.
+
+## Running on multiple fasta files
+
+### Option 1: Combine your fasta files into a single file
+
+If you're sure that all the contig names in your fasta files are unique (up to the first space), you can combine them into a single fasta file and run the pipeline on that file.
+
+### Option 2: Run the pipeline on each fasta file separately
+
+If you're not sure that all the contig names in your fasta files are unique, you can run the pipeline on each fasta file separately.
+
+You will need:
+
+- the latest version of [GNU parallel](https://ftpmirror.gnu.org/parallel/parallel-latest.tar.bz2) installed to make your life easier.
+- to update the [`run_multi_file_blast.sh`](scripts/run_multi_file_blast.sh) script to work for your use case. Please feel free to consult with Sunit/Xiandong if you need help with this.
+
+Here is an example of the command that submits one job per fasta file:
+
+```{bash}
+aws s3 ls s3://maf-users/Daisy_Lee/abricate/20230614/ \
+| awk '{print $4}' \
+| parallel -j 4 "bash run_multi_file_blast.sh {}" &> run_multi_file_blast.log &
+```
+
+NOTE 1: The above command will run 4 jobs in parallel. You can change the number of jobs to run in parallel by changing the `-j` parameter.
+NOTE 2: The above command has only been tested on a Mac or Unix system. It may not work on Windows.
