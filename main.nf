@@ -68,7 +68,7 @@ if (db_map[params.db]){
 }
 
 //Creates working dir
-workingpath = params.outdir + "/" + params.project + "/" + params.prefix + "/" + params.db
+workingpath = params.outdir + "/" + params.project + "/" + params.sample_name + "/" + params.db + "/" + params.prefix
 workingdir = file(workingpath)
 
 if( !workingdir.exists() ) {
@@ -76,7 +76,7 @@ if( !workingdir.exists() ) {
         exit 1, "Cannot create working directory: $workingpath"
     } 
 }    
-def out = "${workingpath}/${params.prefix}.${params.blast_type}.tsv"
+def out = "${workingpath}/${params.sample_name}.${params.blast_type}.tsv"
 
 /* 
  * Given the query parameter creates a channel emitting the query fasta file(s), 
