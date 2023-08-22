@@ -4,15 +4,15 @@ A Nextflow script that will run BLAST and using fasta files on S3 and databases 
 
 ```{bash}
 aws batch submit-job \
-    --profile maf \
-    --job-name nf-blast-20221011.1 \
+    --job-name nf-blast-SH0002532-00280 \
     --job-queue priority-maf-pipelines \
     --job-definition nextflow-production \
-    --container-overrides command=s3://nextflow-pipelines/nf-blast,\
-"--query","s3://nextflow-pipelines/blast/data/TY0000004.cons.fa",\
-"--db","nt",
-"--project","00_Test",
-"--prefix","TY0000004"
+    --container-overrides command=fischbachlab/nf-blast,\
+"--query","s3://genomics-workflow-core/Results/HybridAssembly/MITI-MCB/SH0002532-00280/20230505/UNICYCLER/assembly.fasta",\
+"--project","MITI-MCB",\
+"--sample_name","SH0002532-00280",\
+"--db","immeDB",\
+"--prefix","20230822"
 ```
 
 ## Sample Parameters for Nextflow Tower
@@ -62,14 +62,28 @@ You will need:
 - the latest version of [GNU parallel](https://ftpmirror.gnu.org/parallel/parallel-latest.tar.bz2) installed to make your life easier.
 - to update the [`run_multi_file_blast.sh`](scripts/run_multi_file_blast.sh) script to work for your use case. Please feel free to consult with Sunit/Xiandong if you need help with this.
 
-Here is an example of the command that submits one job per fasta file:
+Create a comma-separated `seedfile`, where first column is the sample name and second is the path to the fasta file. For example:
 
-```{bash}
-aws s3 ls s3://maf-users/Daisy_Lee/abricate/20230614/ \
-| awk '{print $4}' \
-| parallel -j 4 "bash run_multi_file_blast.sh {}" &> run_multi_file_blast.log &
+```bash
+sample_name,fasta_file
+SH0001852-00262,s3://genomics-workflow-core/Results/HybridAssembly/MITI-MCB/SH0001852-00262/20230120/UNICYCLER/assembly.fasta
+SH0001328-00301,s3://genomics-workflow-core/Results/HybridAssembly/MITI-MCB/SH0001328-00301/20230610/UNICYCLER/assembly.fasta
+SH0001374-00303,s3://genomics-workflow-core/Results/HybridAssembly/MITI-MCB/SH0001374-00303/20230602/UNICYCLER/assembly.fasta
+SH0001378-00273,s3://genomics-workflow-core/Results/HybridAssembly/MITI-MCB/SH0001378-00273/20230602/UNICYCLER/assembly.fasta
+SH0001421-00003,s3://genomics-workflow-core/Results/HybridAssembly/MITI-MCB/SH0001421-00003/20230602/UNICYCLER/assembly.fasta
+SH0001515-00040,s3://genomics-workflow-core/Results/HybridAssembly/MITI-MCB/SH0001515-00040/UNICYCLER/assembly.fasta
 ```
 
->**NOTE 1**: The above command will run 4 jobs in parallel. You can change the number of jobs to run in parallel by changing the `-j` parameter.
+Use the `run_multi_file_blast.sh` script to submit one job per fasta file:
+
+```{bash}
+cat seedfile.csv \
+| tail -n +2 \
+| parallel -j 4 --col-sep "," "bash run_multi_file_blast.sh {1} {2} 20230822" &> run_multi_file_blast.log &
+```
+
+Where: `20230822` is today's date in the format `YYYYMMDD`.
+
+>**NOTE 1**: The above command will run 4 jobs in parallel. You can change the number of jobs to run in parallel by updating the `-j` parameter.
 >
 >**NOTE 2**: The above command has only been tested on a Mac or Unix system. It may not work on Windows.
