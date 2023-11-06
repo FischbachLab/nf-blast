@@ -47,20 +47,7 @@ aws batch submit-job \
 - a maximum of `500` alignments are allowed per query.
 - the query file is split into smaller chunnks of `1000` sequences each, before running a blast on each chunk in parallel and finally merging into a single output table.
 
-## Running on multiple fasta files
-
-### Option 1: Combine your fasta files into a single file
-
-If you're sure that all the contig names in your fasta files are unique (up to the first space), you can combine them into a single fasta file and run the pipeline on that file.
-
-### Option 2: Run the pipeline on each fasta file separately
-
-If you're not sure that all the contig names in your fasta files are unique, you can run the pipeline on each fasta file separately.
-
-You will need:
-
-- the latest version of [GNU parallel](https://ftpmirror.gnu.org/parallel/parallel-latest.tar.bz2) installed to make your life easier.
-- to update the [`run_multi_file_blast.sh`](scripts/run_multi_file_blast.sh) script to work for your use case. Please feel free to consult with Sunit/Xiandong if you need help with this.
+## Using a `seedfile` to run Blast on multiple fasta files [PREFERRED]
 
 Create a comma-separated `seedfile`, where first column is the sample name and second is the path to the fasta file. For example:
 
@@ -74,16 +61,16 @@ SH0001421-00003,s3://genomics-workflow-core/Results/HybridAssembly/MITI-MCB/SH00
 SH0001515-00040,s3://genomics-workflow-core/Results/HybridAssembly/MITI-MCB/SH0001515-00040/UNICYCLER/assembly.fasta
 ```
 
-Use the `run_multi_file_blast.sh` script to submit one job per fasta file:
-
 ```{bash}
-cat seedfile.csv \
-| tail -n +2 \
-| parallel -j 4 --col-sep "," "bash run_multi_file_blast.sh {1} {2} 20230822" &> run_multi_file_blast.log &
+aws batch submit-job \
+    --job-name nf-blast-seedfile-2 \
+    --job-queue priority-maf-pipelines \
+    --job-definition nextflow-production \
+    --container-overrides command=fischbachlab/nf-blast,\
+"--seedfile","s3://genomics-workflow-core/Results/AMRFinderPlus/MITI-MCB/20231106/00_seedfile/20231106_seedfile.csv",\
+"--db","immeDB",\
+"--project","MITI-MCB",\
+"--prefix","20231106"
 ```
 
-Where: `20230822` is today's date in the format `YYYYMMDD`.
-
->**NOTE 1**: The above command will run 4 jobs in parallel. You can change the number of jobs to run in parallel by updating the `-j` parameter.
->
->**NOTE 2**: The above command has only been tested on a Mac or Unix system. It may not work on Windows.
+Where: `20231106` is today's date in the format `YYYYMMDD`.
