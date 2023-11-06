@@ -9,8 +9,14 @@ def helpMessage() {
     Blast sequences against a database
     
     Required Arguments:
-      --seedfile            CSV file with sample_name and fasta_file columns
+      Multiple files:
+      --seedfile            CSV file with sample_name and fasta_file columns; redundant with --query and --sample_name
+      
+      One sample/file at a time:
       --query               Query file in fasta format; redundant with --seedfile
+      --sample_name         Sample name; redundant with --seedfile
+
+      Blast arguments:
       --db                  Blast database
       --blast_type          Which blast would you like to run? (default: ${params.blast_type})
       --prefix              Output prefix (default: ${params.prefix})
@@ -74,42 +80,36 @@ if (db_map[params.db]){
 
 // Base path for all output files
 basepath = params.outdir + "/" + params.project
-//Creates working dir
-workingpath = basepath + "/" + params.sample_name + "/" + params.db + "/" + params.prefix
-workingdir = file(workingpath)
 
-if( !workingdir.exists() ) {
-    if( !workingdir.mkdirs() )     {
-        exit 1, "Cannot create working directory: $workingpath"
-    } 
-}    
-def out = "${workingpath}/${params.sample_name}.${params.blast_type}.tsv"
-
-/* 
- * Given the query parameter creates a channel emitting the query fasta file(s), 
- * the file is split in chunks containing as many sequences as defined by the parameter 'chunksize'.
- * Finally assign the result channel to the variable 'fasta_ch' 
- */
 if (params.seedfile == null){
+  /* 
+  * Given the query parameter creates a channel emitting the query fasta file(s), 
+  * the file is split in chunks containing as many sequences as defined by the parameter 'chunksize'.
+  * Finally assign the result channel to the variable 'fasta_ch' 
+  */
+
+  //Creates working dir
+  workingpath = basepath + "/" + params.sample_name + "/" + params.db + "/" + params.prefix
+  workingdir = file(workingpath)
+
+  if( !workingdir.exists() ) {
+      if( !workingdir.mkdirs() )     {
+          exit 1, "Cannot create working directory: $workingpath"
+      } 
+  }    
+  def out = "${workingpath}/${params.sample_name}.${params.blast_type}.tsv"
+
+  /* 
+  * Executes a BLAST job for each chunk emitted by the 'fasta_ch' channel 
+  */
+
   Channel
     .fromPath(params.query)
     .ifEmpty { exit 1, "Cannot find matching fasta file" }
     .splitFasta(by: params.chunksize, file:true)
     .set { fasta_ch }
-} else {
-  Channel
-    .fromPath(params.seedfile)
-    .ifEmpty { exit 1, "Cannot find any seed file matching: ${params.seedfile}." }
-    .splitCsv(header: true, sep: ',')
-    .map{ row -> tuple(row.sample_name, file(row.fasta_file)) }
-    .set {  seedfile_fasta_ch  }
-}
-/* 
- * Executes a BLAST job for each chunk emitted by the 'fasta_ch' channel 
- * and creates as output a channel named 'top_hits' emitting the resulting 
- * BLAST matches  
- */
-process blast {
+
+  process blast {
     cpus 2
     memory 8.GB
 
@@ -129,37 +129,52 @@ process blast {
       -num_alignments ${params.max_aln} \
       -outfmt ${params.outfmt} > blast_result
     """
-}
+  }
 
-process seedfile_blast {
-    cpus 2
-    memory 8.GB
-
-    publishDir "${basepath}/${name}/${params.db}/${params.prefix}", mode: 'copy', pattern: "*.tsv"
-
-    input:
-    tuple val(name), file(fasta_file) from seedfile_fasta_ch
-
-    output:
-    path("${name}.${params.blast_type}.tsv")
-
-    script:
-    """
-    ${params.blast_type} \
-      -num_threads  $task.cpus \
-      -query query.fa \
-      -db $db_path \
-      -dbsize ${params.dbsize} \
-      -num_alignments ${params.max_aln} \
-      -outfmt ${params.outfmt} > $name.${params.blast_type}.tsv
-    """
-}
-
-/* 
+ /* 
  * Collects all the sequences files into a single file 
  */ 
-hits_ch
-    .collectFile(name: out)
+  hits_ch
+      .collectFile(name: out)
+
+} else{
+
+  Channel
+    .fromPath(params.seedfile)
+    .ifEmpty { exit 1, "Cannot find any seed file matching: ${params.seedfile}." }
+    .splitCsv(header: true, sep: ',')
+    .map{ row -> tuple(row.sample_name, file(row.fasta_file)) }
+    .set {  fasta_ch  }
+
+
+  /* 
+  * Executes a BLAST job for each row/file emitted by the 'fasta_ch' channel 
+  */
+
+  process seedfile_blast {
+      cpus 2
+      memory 8.GB
+
+      publishDir "${basepath}/${name}/${params.db}/${params.prefix}", mode: 'copy', pattern: "*.tsv"
+
+      input:
+      tuple val(name), file(fasta_file) from fasta_ch
+
+      output:
+      path("${name}.${params.blast_type}.tsv")
+
+      script:
+      """
+      ${params.blast_type} \
+        -num_threads  $task.cpus \
+        -query query.fa \
+        -db $db_path \
+        -dbsize ${params.dbsize} \
+        -num_alignments ${params.max_aln} \
+        -outfmt ${params.outfmt} > $name.${params.blast_type}.tsv
+      """
+  }
+}
 
 // process show_downloadable_databases {
 //   // directives
