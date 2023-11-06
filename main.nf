@@ -109,7 +109,7 @@ if (params.seedfile == null){
     .splitFasta(by: params.chunksize, file:true)
     .set { fasta_ch }
 
-  process blast {
+  process BLAST {
     cpus 2
     memory 8.GB
 
@@ -151,7 +151,7 @@ if (params.seedfile == null){
   * Executes a BLAST job for each row/file emitted by the 'fasta_ch' channel 
   */
 
-  process seedfile_blast {
+  process BLASTS {
       cpus 2
       memory 8.GB
 
@@ -167,7 +167,7 @@ if (params.seedfile == null){
       """
       ${params.blast_type} \
         -num_threads  $task.cpus \
-        -query query.fa \
+        -query $fasta_file \
         -db $db_path \
         -dbsize ${params.dbsize} \
         -num_alignments ${params.max_aln} \
