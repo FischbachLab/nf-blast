@@ -61,6 +61,18 @@ SH0001421-00003,s3://genomics-workflow-core/Results/HybridAssembly/MITI-MCB/SH00
 SH0001515-00040,s3://genomics-workflow-core/Results/HybridAssembly/MITI-MCB/SH0001515-00040/UNICYCLER/assembly.fasta
 ```
 
+Upload this file to the expected output location.
+
+```bash
+s3://genomics-workflow-core/Results/Blast/<PROJECT>/<PREFIX>/00_seedfile/seedfile.csv
+```
+
+Example:
+
+```bash
+s3://genomics-workflow-core/Results/Blast/MITI-MCB/20231106/00_seedfile/20231106_seedfile.csv
+```
+
 ```{bash}
 aws batch submit-job \
     --job-name nf-blast-seedfile-2 \
