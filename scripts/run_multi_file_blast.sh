@@ -1,4 +1,6 @@
 #!/bin/bash -x
+# DEFUNCT: This script is no longer used. It was used to run blast on multiple files at once.
+#          Use the nextflow pipeline with the `--seedfile` parameter instead.
 
 set -euo pipefail
 
