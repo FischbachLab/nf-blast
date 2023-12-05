@@ -89,7 +89,7 @@ process BLAST {
   memory 8.GB
 
   input:
-  path 'query.fa' from fasta_ch
+  path 'query.fa'
 
   output:
   // file 'blast_result' into hits_ch
@@ -117,7 +117,7 @@ process BLASTS {
     publishDir "${basepath}/${name}/${params.db}/${params.prefix}", mode: 'copy', pattern: "*.tsv"
 
     input:
-    tuple val(name), file(fasta_file) from fasta_ch
+    tuple val(name), file(fasta_file)
 
     output:
     path("${name}.${params.blast_type}.tsv")
