@@ -162,7 +162,8 @@ process show_downloadable_databases {
             exit 1, "Cannot create working directory: $workingpath"
         } 
     }    
-    def out = "${workingpath}/${params.sample_name}.${params.blast_type}.tsv"
+    
+    out = "${workingpath}/${params.sample_name}.${params.blast_type}.tsv"
 
     /* 
     * Given the query parameter creates a channel emitting the query fasta file(s), 
