@@ -85,6 +85,7 @@ basepath = params.outdir + "/" + params.project
 */
 
 process BLAST {
+  tag { params.sample_name }
   cpus 2
   memory 8.GB
 
@@ -111,6 +112,7 @@ process BLAST {
 * Executes a BLAST job for each row/file emitted by the 'fasta_ch' channel 
 */
 process BLASTS {
+    tag { name }
     cpus 2
     memory 8.GB
 
