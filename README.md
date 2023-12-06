@@ -2,7 +2,7 @@
 
 A Nextflow script that will run BLAST and using fasta files on S3 and databases available on a shared filesystem (EFS).
 
-```{bash}
+```bash
 aws batch submit-job \
     --job-name nf-blast-SH0002532-00280 \
     --job-queue priority-maf-pipelines \
@@ -17,7 +17,7 @@ aws batch submit-job \
 
 ## Sample Parameters for Nextflow Tower
 
-```{json}
+```json
 {
     "blast_type": "blastn",
     "db": "nt",
@@ -31,11 +31,28 @@ aws batch submit-job \
 }
 ```
 
+## Example: Protein BLAST against CDD
+
+```bash
+aws batch submit-job \
+    --job-name nf-blast-aap-cdd-4 \
+    --job-queue priority-maf-pipelines \
+    --job-definition nextflow-production \
+    --container-overrides command=fischbachlab/nf-blast,\
+"-r","sj-seedfile",\
+"--seedfile","s3://genomics-workflow-core/Results/Blast/s_epi/aap/00_seedfiles/aap.seedfile.csv",\
+"--blast_type","blastp",\
+"--db","cdd",\
+"--max_aln","5000",\
+"--project","s_epi",\
+"--prefix","aap"
+```
+
 ## Available databases
 
-- `nt`- [Last Updated: 2022-10-11] version: 2022-10-01-01-05-02
-- `nr` - [Last Updated: 2022-10-11] version: 2022-10-01-01-05-02
-- `ncbi_16s` - [Last Updated: 2022-10-11] version: 2022-10-01-01-05-02
+- `nt`- [Last Updated: 2023-12-05] version: 2023-12-02-01-05-02
+- `nr` - [Last Updated: 2023-12-05] version: 2023-12-02-01-05-02
+- `ncbi_16s` - [Last Updated: 2023-12-05] version: 2023-12-02-01-05-02
 - `silva` SSU v138.1  - [Last Updated: 2021-07-22]
 - `silva_nr` SSU v138.1  - [Last Updated: 2021-07-22]
 - `immeDB` - [Last Updated: 2023-06-27]
@@ -73,7 +90,7 @@ Example:
 s3://genomics-workflow-core/Results/Blast/MITI-MCB/20231106/00_seedfile/20231106_seedfile.csv
 ```
 
-```{bash}
+```bash
 aws batch submit-job \
     --job-name nf-blast-seedfile-2 \
     --job-queue priority-maf-pipelines \
@@ -86,3 +103,16 @@ aws batch submit-job \
 ```
 
 Where: `20231106` is today's date in the format `YYYYMMDD`.
+
+## Blast Databases
+
+### Available NCBI Databases
+
+To see which NCBI databases are available to download and when they were last updated, run the following command:
+
+```bash
+docker run --rm \
+  -w /blast/blastdb \
+  ncbi/blast \
+  update_blastdb.pl --showall pretty
+```
