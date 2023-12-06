@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-nextflow.enable.dsl=1
+nextflow.enable.dsl=2
 // If the user uses the --help flag, print the help text below
 params.help = false
 
@@ -9,7 +9,14 @@ def helpMessage() {
     Blast sequences against a database
     
     Required Arguments:
-      --query               Query file in fasta format
+      Multiple files:
+      --seedfile            CSV file with sample_name and fasta_file columns; redundant with --query and --sample_name
+      
+      One sample/file at a time:
+      --query               Query file in fasta format; redundant with --seedfile
+      --sample_name         Sample name; redundant with --seedfile
+
+      Blast arguments:
       --db                  Blast database
       --blast_type          Which blast would you like to run? (default: ${params.blast_type})
       --prefix              Output prefix (default: ${params.prefix})
@@ -29,16 +36,20 @@ if (params.help){
 }
 
 // // Show help message if the user specifies a fasta file but not makedb or db
-if ((params.query  == null) || (params.db == null) || (params.blast_type == null)){
+if ((params.db == null) || (params.blast_type == null)){
     // Invoke the function above which prints the help message
     helpMessage()
     // Exit out and do not run anything else
     exit 1
 }
 
-Channel
-  .fromPath(params.query)
-  .ifEmpty { exit 1, "Cannot find matching fasta file" }
+if ((params.query  == null) && (params.seedfile == null)){
+    // Invoke the function above which prints the help message
+    helpMessage()
+    // Exit out and do not run anything else
+    exit 1
+}
+
 
 // Write a function to read the db parameter and get the full path from databases json file
 // and error if database does not exist
@@ -46,6 +57,7 @@ def db_map = [
   "nt":"/mnt/efs/databases/Blast/nt/db/nt",
   "nr":"/mnt/efs/databases/Blast/nr/db/nr",
   "ncbi_16s":"/mnt/efs/databases/Blast/16S_ribosomal_RNA/db/16S_ribosomal_RNA",
+  "cdd":"/mnt/efs/databases/Blast/cdd/db/cdd",
   "silva":"/mnt/efs/databases/Blast/Silva/v138.1/silva138",
   "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/silva138_nr",
   "immeDB":"/mnt/efs/databases/Blast/immeDB/db/immeDB",
@@ -61,81 +73,118 @@ if (db_map[params.db]){
   log.info"""
     Cannot find the database specified by --db ${params.db}. Must use one of:
     """.stripIndent()
-    db_map.each { key, value ->
-    log.info "$key"
-}
+    db_map.each { key, value -> log.info "$key"}
   exit 0
 }
 
-//Creates working dir
-workingpath = params.outdir + "/" + params.project + "/" + params.sample_name + "/" + params.db + "/" + params.prefix
-workingdir = file(workingpath)
-
-if( !workingdir.exists() ) {
-    if( !workingdir.mkdirs() )     {
-        exit 1, "Cannot create working directory: $workingpath"
-    } 
-}    
-def out = "${workingpath}/${params.sample_name}.${params.blast_type}.tsv"
+// Base path for all output files
+basepath = params.outdir + "/" + params.project
 
 /* 
- * Given the query parameter creates a channel emitting the query fasta file(s), 
- * the file is split in chunks containing as many sequences as defined by the parameter 'chunksize'.
- * Finally assign the result channel to the variable 'fasta_ch' 
- */
-Channel
-    .fromPath(params.query)
-    .splitFasta(by: params.chunksize, file:true)
-    .set { fasta_ch }
+* Executes a BLAST job for each chunk emitted by the 'fasta_ch' channel 
+*/
+
+process BLAST {
+  tag { params.sample_name }
+  cpus 2
+  memory 8.GB
+
+  input:
+  path 'query.fa'
+
+  output:
+  // file 'blast_result' into hits_ch
+  path 'blast_result' emit
+
+  script:
+  """
+  ${params.blast_type} \
+    -num_threads  $task.cpus \
+    -query query.fa \
+    -db $db_path \
+    -dbsize ${params.dbsize} \
+    -num_alignments ${params.max_aln} \
+    -outfmt ${params.outfmt} > blast_result
+  """
+}
 
 /* 
- * Executes a BLAST job for each chunk emitted by the 'fasta_ch' channel 
- * and creates as output a channel named 'top_hits' emitting the resulting 
- * BLAST matches  
- */
-process blast {
+* Executes a BLAST job for each row/file emitted by the 'fasta_ch' channel 
+*/
+process BLASTS {
+    tag { name }
     cpus 2
     memory 8.GB
 
+    publishDir "${basepath}/${name}/${params.db}/${params.prefix}", mode: 'copy', pattern: "*.tsv"
+
     input:
-    path 'query.fa' from fasta_ch
+    tuple val(name), file(fasta_file)
 
     output:
-    file 'blast_result' into hits_ch
+    path("${name}.${params.blast_type}.tsv")
 
     script:
     """
     ${params.blast_type} \
       -num_threads  $task.cpus \
-      -query query.fa \
+      -query $fasta_file \
       -db $db_path \
       -dbsize ${params.dbsize} \
       -num_alignments ${params.max_aln} \
-      -outfmt ${params.outfmt} > blast_result
+      -outfmt ${params.outfmt} > $name.${params.blast_type}.tsv
     """
 }
 
+process show_downloadable_databases {
+  // directives
+  // a container images is required
+  container "ncbi/blast:latest"
 
-/* 
- * Collects all the sequences files into a single file 
- */ 
-hits_ch
-    .collectFile(name: out)
+  // compute resources for the Batch Job
+  cpus 1
+  memory '512 MB'
 
-// process show_downloadable_databases {
-//   // directives
-//   // a container images is required
-//   container "ncbi/blast:latest"
-
-//   // compute resources for the Batch Job
-//   cpus 1
-//   memory '512 MB'
-
-//   script:
-//   """
-//   update_blastdb.pl --source aws --showall > /mnt/efs/databases/NCBI/db_names.list
-//   cat /mnt/efs/databases/NCBI/db_names.list
-//   update_blastdb.pl -h
-//   """
-// }
+  script:
+  """
+  update_blastdb.pl --source aws --showall > /mnt/efs/databases/NCBI/db_names.list
+  cat /mnt/efs/databases/NCBI/db_names.list
+  update_blastdb.pl -h
+  """
+}
  
+ workflow {
+  if (params.seedfile == null){
+    //Creates working dir
+    workingpath = basepath + "/" + params.sample_name + "/" + params.db + "/" + params.prefix
+    workingdir = file(workingpath)
+
+    if( !workingdir.exists() ) {
+        if( !workingdir.mkdirs() )     {
+            exit 1, "Cannot create working directory: $workingpath"
+        } 
+    }    
+    
+    out = "${workingpath}/${params.sample_name}.${params.blast_type}.tsv"
+
+    /* 
+    * Given the query parameter creates a channel emitting the query fasta file(s), 
+    * the file is split in chunks containing as many sequences as defined by the parameter 'chunksize'.
+    * Finally assign the result channel to the variable 'fasta_ch' 
+    */
+    fasta_ch = Channel
+      .fromPath(params.query)
+      .ifEmpty { exit 1, "Cannot find matching fasta file" }
+      .splitFasta(by: params.chunksize, file:true)
+
+    BLAST(fasta_ch).collectFile(name:out)
+  } else {
+    fasta_ch = Channel
+      .fromPath(params.seedfile)
+      .ifEmpty { exit 1, "Cannot find any seed file matching: ${params.seedfile}." }
+      .splitCsv(header: true, sep: ',')
+      .map{ row -> tuple(row.sample_name, file(row.fasta_file)) }
+    
+    BLASTS(fasta_ch)
+  }
+ }
