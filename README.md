@@ -116,3 +116,14 @@ docker run --rm \
   ncbi/blast \
   update_blastdb.pl --showall pretty
 ```
+
+### Using the `-params-file` option
+
+```bash
+aws batch submit-job \                                                                              
+    --job-name nf-blast-aap-nr-limit-s-epi \
+    --job-queue priority-maf-pipelines \
+    --job-definition nextflow-production \
+    --container-overrides command=fischbachlab/nf-blast,\
+"-params-file","s3://genomics-workflow-core/Results/Blast/s_epi/aap/00_seedfiles/aap.s-epi.taxonId1282.json"
+```
