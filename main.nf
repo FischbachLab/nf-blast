@@ -132,6 +132,7 @@ process BLASTS {
       -db $db_path \
       -dbsize ${params.dbsize} \
       -num_alignments ${params.max_aln} \
+      ${params.additional_params} \
       -outfmt ${params.outfmt} > $name.${params.blast_type}.tsv
     """
 }
