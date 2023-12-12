@@ -120,7 +120,7 @@ docker run --rm \
 ### Using the `-params-file` option
 
 ```bash
-aws batch submit-job \                                                                              
+aws batch submit-job \
     --job-name nf-blast-aap-nr-limit-s-epi \
     --job-queue priority-maf-pipelines \
     --job-definition nextflow-production \
