@@ -61,6 +61,7 @@ def db_map = [
   "silva":"/mnt/efs/databases/Blast/Silva/v138.1/silva138",
   "silva_nr":"/mnt/efs/databases/Blast/Silva/v138.1/silva138_nr",
   "immeDB":"/mnt/efs/databases/Blast/immeDB/db/immeDB",
+  "MITI-001v3_20240604":"/mnt/efs/databases/Blast/MITI-001v3_20240604/MITI-001v3_20240604",
 ]
 
 

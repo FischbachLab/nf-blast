@@ -56,6 +56,7 @@ aws batch submit-job \
 - `silva` SSU v138.1  - [Last Updated: 2021-07-22]
 - `silva_nr` SSU v138.1  - [Last Updated: 2021-07-22]
 - `immeDB` - [Last Updated: 2023-06-27]
+- `MITI-001v3_20240604` - [Last Updated: 2025-06-06]
 
 ## By default
 
