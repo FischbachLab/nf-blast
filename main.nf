@@ -95,7 +95,7 @@ process BLAST {
 
   output:
   // file 'blast_result' into hits_ch
-  path 'blast_result' emit
+  path 'blast_result' 
 
   script:
   """
